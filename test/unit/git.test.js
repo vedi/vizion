@@ -81,10 +81,10 @@ describe('Unit: git', () => {
     let getHeadCommitStub;
 
     before(() => {
-      getHeadCommitStub = sinon.stub(jsGitService, 'getHeadCommit').callsFake((myFolder, cb) => {
+      getHeadCommitStub = sinon.stub(jsGitService, 'getHeadCommit').callsFake(async (myFolder) => {
         expect(myFolder).to.eq(folder);
 
-        cb(null, commit);
+        return commit;
       });
     });
 
@@ -175,12 +175,11 @@ describe('Unit: git', () => {
 
     context('not on remote', () => {
       before(() => {
-        getRefHashStub = sinon.stub(jsGitService, 'getRefHash').callsFake((myFolder, myBranch, myRemote, cb) => {
+        getRefHashStub = sinon.stub(jsGitService, 'getRefHash').callsFake(async (myFolder, myBranch, myRemote) => {
           expect(myFolder).to.eq(folder);
           expect(myBranch).to.eq(data.branch);
           expect(myRemote).to.eq(data.remote);
-
-          cb(null, null);
+          return null;
         });
       });
 
@@ -200,12 +199,11 @@ describe('Unit: git', () => {
 
     context('on remote', () => {
       before(() => {
-        getRefHashStub = sinon.stub(jsGitService, 'getRefHash').callsFake((myFolder, myBranch, myRemote, cb) => {
+        getRefHashStub = sinon.stub(jsGitService, 'getRefHash').callsFake(async (myFolder, myBranch, myRemote) => {
           expect(myFolder).to.eq(folder);
           expect(myBranch).to.eq(data.branch);
           expect(myRemote).to.eq(data.remote);
-
-          cb(null, 'FX421345CX');
+          return 'FX421345CX';
         });
       });
 
@@ -240,13 +238,13 @@ describe('Unit: git', () => {
     let getCommitHistoryStub;
 
     before(() => {
-      getCommitHistoryStub = sinon.stub(jsGitService, 'getCommitHistory').callsFake((myFolder, n, myBranch, myRemote, cb) => {
+      getCommitHistoryStub = sinon.stub(jsGitService, 'getCommitHistory').callsFake(async (myFolder, n, myBranch, myRemote) => {
         expect(myFolder).to.eq(folder);
         expect(n).to.eq(100);
         expect(myBranch).to.eq(data.branch);
         expect(myRemote).to.eq(data.remote);
 
-        cb(null, commitHistory);
+        return commitHistory;
       });
     });
 
