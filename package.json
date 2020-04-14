@@ -27,6 +27,7 @@
   "main": "index.js",
   "scripts": {
     "cover": "nyc --reporter=html npm test",
+    "eslint": "eslint --color .",
     "test": "mocha"
   },
   "dependencies": {
@@ -36,6 +37,10 @@
   },
   "devDependencies": {
     "chai": "4.1.2",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-mocha": "^6.3.0",
     "mocha": "5.2.0",
     "nyc": "12.0.2",
     "shelljs": "0.8.2",

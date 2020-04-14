@@ -1,185 +1,181 @@
-var expect = require('chai').expect;
-var fs = require('fs');
-var sinon = require('sinon');
-var ini = require('ini');
+const { expect } = require('chai');
+const fs = require('fs');
+const sinon = require('sinon');
+const ini = require('ini');
 
-var git = require("../../lib/git/git");
-var jsGitService = require("../../lib/git/js-git-service");
+const git = require('../../lib/git/git');
+const jsGitService = require('../../lib/git/js-git-service');
 
 
-describe('Unit: git', function () {
+describe('Unit: git', () => {
+  describe('parseGitConfig', () => {
+    const folder = 'my-folder';
+    const config = { stub: 'config' };
+    const data = { stub: 'data' };
+    let readFileStub; let
+      parseStub;
 
-  describe('parseGitConfig', function parseGitConfigTest() {
-    var folder = "my-folder";
-    var config = {stub: 'config'};
-    var data = {stub: 'data'};
-    var readFileStub, parseStub;
-
-    before(function beforeTest() {
-      readFileStub = sinon.stub(fs, 'readFile').callsFake(function (path, encoding, cb) {
-        if (process.platform !== 'win32' && process.platform !== 'win64')
-          expect(path).to.eq('my-folder/.git/config');
-        else
-          expect(path).to.eq('my-folder\\.git\\config');
+    before(() => {
+      readFileStub = sinon.stub(fs, 'readFile').callsFake((path, encoding, cb) => {
+        if (process.platform !== 'win32' && process.platform !== 'win64') expect(path).to.eq('my-folder/.git/config');
+        else expect(path).to.eq('my-folder\\.git\\config');
 
         cb(null, data);
       });
 
-      parseStub = sinon.stub(ini, 'parse').callsFake(async function (myData) {
+      parseStub = sinon.stub(ini, 'parse').callsFake(async (myData) => {
         expect(myData).to.eq(data);
 
         return config;
       });
     });
 
-    it('ok', async function it() {
+    it('ok', async () => {
       const myConfig = await git.parseGitConfig(folder);
       expect(myConfig).to.eq(config);
     });
 
-    after(function afterTest() {
+    after(() => {
       readFileStub.restore();
       parseStub.restore();
     });
   });
 
-  describe('getUrl', function getUrlTest() {
-    var folder = "my-folder";
-    var config = {
+  describe('getUrl', () => {
+    const folder = 'my-folder';
+    const config = {
       'remote "origin"': {
-        url: 'test-url'
-      }
+        url: 'test-url',
+      },
     };
-    var parseGitConfigStub;
+    let parseGitConfigStub;
 
-    before(function beforeTest() {
-      parseGitConfigStub = sinon.stub(git, 'parseGitConfig').callsFake(async function (myFolder) {
+    before(() => {
+      parseGitConfigStub = sinon.stub(git, 'parseGitConfig').callsFake(async (myFolder) => {
         expect(myFolder).to.eq(folder);
         return config;
       });
     });
 
-    it('ok', async function it() {
+    it('ok', async () => {
       const data = await git.getUrl(folder);
       expect(data).to.deep.eq({
-        "type": "git",
-        "url": "test-url"
+        type: 'git',
+        url: 'test-url',
       });
     });
 
-    after(function afterTest() {
+    after(() => {
       parseGitConfigStub.restore();
     });
   });
 
 
-  describe('getCommitInfo', function getCommitInfoTest() {
-    var folder = "my-folder";
-    var commit = {
+  describe('getCommitInfo', () => {
+    const folder = 'my-folder';
+    const commit = {
       hash: 'xfd4560',
-      message: 'my message'
+      message: 'my message',
     };
-    var data = {};
-    var getHeadCommitStub;
+    let data = {};
+    let getHeadCommitStub;
 
-    before(function beforeTest() {
-      getHeadCommitStub = sinon.stub(jsGitService, 'getHeadCommit').callsFake(function (myFolder, cb) {
+    before(() => {
+      getHeadCommitStub = sinon.stub(jsGitService, 'getHeadCommit').callsFake((myFolder, cb) => {
         expect(myFolder).to.eq(folder);
 
         cb(null, commit);
       });
     });
 
-    it('ok', async function it() {
+    it('ok', async () => {
       data = await git.getCommitInfo(folder, data);
       expect(data).to.deep.eq({
-        "revision": commit.hash,
-        "comment": commit.message
+        revision: commit.hash,
+        comment: commit.message,
       });
     });
 
-    after(function afterTest() {
+    after(() => {
       getHeadCommitStub.restore();
     });
   });
 
-  describe('getBranch', function getBranchTest() {
-    var folder = "my-folder";
-    var data = {};
-    var readFileStub;
+  describe('getBranch', () => {
+    const folder = 'my-folder';
+    let data = {};
+    let readFileStub;
 
-    before(function beforeTest() {
-      readFileStub = sinon.stub(fs, 'readFile').callsFake(function (path, encoding, cb) {
-        if (process.platform !== 'win32' && process.platform !== 'win64')
-            expect(path).to.eq('my-folder/.git/HEAD');
-        else
-            expect(path).to.eq('my-folder\\.git\\HEAD');
+    before(() => {
+      readFileStub = sinon.stub(fs, 'readFile').callsFake((path, encoding, cb) => {
+        if (process.platform !== 'win32' && process.platform !== 'win64') expect(path).to.eq('my-folder/.git/HEAD');
+        else expect(path).to.eq('my-folder\\.git\\HEAD');
         expect(encoding).to.eq('utf-8');
 
-        cb(null, "ref: refs/heads/master");
+        cb(null, 'ref: refs/heads/master');
       });
     });
 
-    it('ok', async function it() {
+    it('ok', async () => {
       data = await git.getBranch(folder, data);
       expect(data).to.deep.eq({
-        "branch": "master",
+        branch: 'master',
       });
     });
 
-    after(function afterTest() {
+    after(() => {
       readFileStub.restore();
     });
   });
 
-  describe('getRemote', function getRemoteTest() {
-    var folder = "my-folder";
-    var config = {
+  describe('getRemote', () => {
+    const folder = 'my-folder';
+    const config = {
       'remote "origin"': {
-        url: 'test-url'
+        url: 'test-url',
       },
       'remote "other"': {
-        url: 'other-url'
-      }
+        url: 'other-url',
+      },
     };
-    var data = {};
-    var parseGitConfigStub;
+    let data = {};
+    let parseGitConfigStub;
 
-    before(function beforeTest() {
-      parseGitConfigStub = sinon.stub(git, 'parseGitConfig').callsFake(async function (myFolder) {
+    before(() => {
+      parseGitConfigStub = sinon.stub(git, 'parseGitConfig').callsFake(async (myFolder) => {
         expect(myFolder).to.eq(folder);
         return config;
       });
     });
 
-    it('ok', async function it() {
+    it('ok', async () => {
       data = await git.getRemote(folder, data);
       expect(data).to.deep.eq({
-        "remote": "origin",
-        "remotes": [
-          "origin",
-          "other"
-        ]
+        remote: 'origin',
+        remotes: [
+          'origin',
+          'other',
+        ],
       });
     });
 
-    after(function afterTest() {
+    after(() => {
       parseGitConfigStub.restore();
     });
   });
 
 
-  describe('isCurrentBranchOnRemote', function isCurrentBranchOnRemoteTest() {
-    var folder = "my-folder";
-    var data = {
+  describe('isCurrentBranchOnRemote', () => {
+    const folder = 'my-folder';
+    let data = {
       branch: 'my-branch',
-      remote: 'my-remote'
+      remote: 'my-remote',
     };
-    var getRefHashStub;
+    let getRefHashStub;
 
-    context('not on remote', function () {
-      before(function beforeTest() {
-        getRefHashStub = sinon.stub(jsGitService, 'getRefHash').callsFake(function (myFolder,myBranch,myRemote, cb) {
+    context('not on remote', () => {
+      before(() => {
+        getRefHashStub = sinon.stub(jsGitService, 'getRefHash').callsFake((myFolder, myBranch, myRemote, cb) => {
           expect(myFolder).to.eq(folder);
           expect(myBranch).to.eq(data.branch);
           expect(myRemote).to.eq(data.remote);
@@ -188,64 +184,63 @@ describe('Unit: git', function () {
         });
       });
 
-      it('ok', async function it() {
+      it('ok', async () => {
         data = await git.isCurrentBranchOnRemote(folder, data);
         expect(data).to.deep.eq({
-          "branch": "my-branch",
-          "branch_exists_on_remote": false,
-          "remote": "my-remote"
+          branch: 'my-branch',
+          branch_exists_on_remote: false,
+          remote: 'my-remote',
         });
       });
 
-      after(function afterTest() {
+      after(() => {
         getRefHashStub.restore();
       });
     });
 
-    context('on remote', function () {
-      before(function beforeTest() {
-        getRefHashStub = sinon.stub(jsGitService, 'getRefHash').callsFake(function (myFolder,myBranch,myRemote, cb) {
+    context('on remote', () => {
+      before(() => {
+        getRefHashStub = sinon.stub(jsGitService, 'getRefHash').callsFake((myFolder, myBranch, myRemote, cb) => {
           expect(myFolder).to.eq(folder);
           expect(myBranch).to.eq(data.branch);
           expect(myRemote).to.eq(data.remote);
 
-          cb(null, "FX421345CX");
+          cb(null, 'FX421345CX');
         });
       });
 
-      it('ok', async function it() {
+      it('ok', async () => {
         data = await git.isCurrentBranchOnRemote(folder, data);
         expect(data).to.deep.eq({
-          "branch": "my-branch",
-          "branch_exists_on_remote": true,
-          "remote": "my-remote"
+          branch: 'my-branch',
+          branch_exists_on_remote: true,
+          remote: 'my-remote',
         });
       });
 
-      after(function afterTest() {
+      after(() => {
         getRefHashStub.restore();
       });
     });
-
   });
 
-  describe('getPrevNext', function getPrevNextTest() {
-    var folder = "my-folder";
-    var data = {
-      branch_exists_on_remote:true,
+  describe('getPrevNext', () => {
+    const folder = 'my-folder';
+    let data = {
+      branch_exists_on_remote: true,
       branch: 'my-branch',
       remote: 'my-remote',
-      revision: '2'
+      revision: '2',
     };
-    var commitHistory = [
-      {hash: '3'},
-      {hash: '2'},
-      {hash: '1'},
+    const commitHistory = [
+      { hash: '3' },
+      { hash: '2' },
+      { hash: '1' },
     ];
-    var getCommitHistoryStub;
+    let getCommitHistoryStub;
 
-    before(function beforeTest() {
-      getCommitHistoryStub = sinon.stub(jsGitService, 'getCommitHistory').callsFake(function (myFolder, n, myBranch, myRemote, cb) {
+    before(() => {
+      getCommitHistoryStub = sinon.stub(jsGitService, 'getCommitHistory').callsFake((myFolder, n, myBranch, myRemote, cb) => {
         expect(myFolder).to.eq(folder);
         expect(n).to.eq(100);
         expect(myBranch).to.eq(data.branch);
@@ -255,22 +250,21 @@ describe('Unit: git', function () {
       });
     });
 
-    it('ok', async function it() {
+    it('ok', async () => {
       data = await git.getPrevNext(folder, data);
       expect(data).to.deep.eq({
-        "ahead": false,
-        "branch": "my-branch",
-        "branch_exists_on_remote": true,
-        "next_rev": "3",
-        "prev_rev": "1",
-        "remote": "my-remote",
-        "revision": "2"
+        ahead: false,
+        branch: 'my-branch',
+        branch_exists_on_remote: true,
+        next_rev: '3',
+        prev_rev: '1',
+        remote: 'my-remote',
+        revision: '2',
       });
     });
 
-    after(function afterTest() {
+    after(() => {
       getCommitHistoryStub.restore();
     });
   });
-
 });
